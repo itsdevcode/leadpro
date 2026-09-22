@@ -1,0 +1,4 @@
+venv
+app/__pycache__/main.cpython-312.pyc
+.env
+alembic/script.py.mako
