@@ -10,8 +10,8 @@ class Otp(Base):
     code: Mapped[str] = mapped_column(String, nullable=False)
     expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     is_used: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), unique=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, nullable=False)
     updated_at: Mapped[datetime|None] = mapped_column(DateTime, default=None, nullable=True)
     
-    user: Mapped["User"] = relationship(back_populates="otps")
+    user: Mapped["User"] = relationship(back_populates="otp")

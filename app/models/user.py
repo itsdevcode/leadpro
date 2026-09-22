@@ -1,6 +1,6 @@
 from sqlalchemy import Integer, String, DateTime, Boolean
 from app.core.database import Base
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
 
 class User(Base):
@@ -15,4 +15,4 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, nullable=False)
     updated_at: Mapped[datetime|None] = mapped_column(DateTime, default=None, nullable=True, onupdate=datetime.now)
 
-    otps: Mapped[List["Otp"]] = relationship(back_populates="user")
+    otp: Mapped["Otp | None"] = relationship(back_populates="user")
