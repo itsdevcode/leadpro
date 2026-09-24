@@ -12,13 +12,13 @@ class OtpCreate(OtpBase):
 
 
 class OtpVerify(OtpBase):
-    pass
+    is_used: bool
 
 
 class OtpInDb(OtpBase):
     id: int
     expires_at: datetime
-    is_verified: bool
+    is_used: bool
     created_at: datetime
     updated_at: datetime
 
