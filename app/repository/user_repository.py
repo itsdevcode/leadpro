@@ -62,3 +62,6 @@ def get_user_by_email(db: Session, email: str) -> User | None:
         select(User).where(User.email == email)
     ).scalar_one_or_none()
     
+def get_otp_by_user_id(db: Session, user_id: int) -> Otp | None:
+    stmt = select(Otp).where(Otp.user_id == user_id)
+    return db.execute(stmt).scalar_one_or_none()

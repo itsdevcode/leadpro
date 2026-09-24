@@ -1,25 +1,27 @@
-from pydantic import BaseModel, ConfigDict
 from datetime import datetime
-from typing import Optional
 
-class OtpBase(BaseModel):
+from pydantic import BaseModel, ConfigDict, EmailStr
+
+
+class OtpCreate(BaseModel):
+    user_id: int
+    otp_code: str
+    expires_at: datetime
+    is_used: bool = False
+
+
+class OtpVerify(BaseModel):
+    email: EmailStr
+    otp_code: str
+
+
+class OtpInDb(BaseModel):
+    id: int
     user_id: int
     otp_code: str
     expires_at: datetime
     is_used: bool
-
-
-class OtpCreate(OtpBase):
-    pass
-
-
-class OtpVerify(OtpBase):
-    pass
-
-
-class OtpInDb(OtpBase):
-    id: int
     created_at: datetime
-    updated_at: datetime
+    updated_at: datetime | None
 
     model_config = ConfigDict(from_attributes=True)
