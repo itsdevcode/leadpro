@@ -3,22 +3,22 @@ from datetime import datetime
 from typing import Optional
 
 class OtpBase(BaseModel):
-    phone_number: str
+    user_id: int
     otp_code: str
+    expires_at: datetime
+    is_used: bool
 
 
 class OtpCreate(OtpBase):
-    expires_at: datetime
+    pass
 
 
 class OtpVerify(OtpBase):
-    is_used: bool
+    pass
 
 
 class OtpInDb(OtpBase):
     id: int
-    expires_at: datetime
-    is_used: bool
     created_at: datetime
     updated_at: datetime
 
