@@ -5,7 +5,7 @@ from typing import Optional
 class UserBase(BaseModel):
     name: str
     email: EmailStr
-    phone_number: str
+    phone_number: str | None = None
     is_active: bool = True
     is_deleted: bool = False
 
@@ -25,6 +25,6 @@ class UserUpdate(BaseModel):
 class UserInDb(UserBase):
     id: int
     created_at: datetime
-    updated_at: datetime
+    updated_at: datetime | None
 
     model_config = ConfigDict(from_attributes=True)
