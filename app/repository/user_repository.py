@@ -4,6 +4,9 @@ from app.schemas.user import UserCreate, UserInDb
 from app.schemas.otp import OtpCreate, OtpInDb
 from app.models.user import User
 from app.models.otp import Otp
+from app.models.refresh_tokens import RefreshToken
+from app.utils.jwt import hash_token
+from datetime import datetime
 
 def create_user(db: Session, user: UserCreate) -> User:
     """
@@ -64,4 +67,19 @@ def get_user_by_email(db: Session, email: str) -> User | None:
     
 def get_otp_by_user_id(db: Session, user_id: int) -> Otp | None:
     stmt = select(Otp).where(Otp.user_id == user_id)
+    return db.execute(stmt).scalar_one_or_none()
+
+def save_refresh_token(db: Session, user_id: int, token: str, expires_at: datetime, user_agent: str | None, ip_address: str | None):
+    db_refresh_token = RefreshToken(
+        user_id=user_id,
+        token_hash=hash_token(token),
+        expires_at=expires_at,
+        user_agent=user_agent,
+        ip_address=ip_address
+    )
+    db.add(db_refresh_token)
+    return db_refresh_token
+
+def verify_refresh_token(db: Session, token_hash: str) -> RefreshToken | None:
+    stmt = select(RefreshToken).where(RefreshToken.token_hash == token_hash)
     return db.execute(stmt).scalar_one_or_none()

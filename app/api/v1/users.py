@@ -2,10 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.schemas.user import UserCreate, UserInDb
 from app.schemas.otp import OtpVerify
+from app.schemas.token import TokenResponse, RefreshTokenRequest
 from app.core.database import get_db
 import app.services.user_service as user_service
 from app.exceptions.user_exceptions import UserAlreadyExistsException, UserNotFoundException
-from app.exceptions.otp_exceptions import InvalidOtpException
+from app.exceptions.otp_exceptions import InvalidOtpException, InvalidRefreshTokenException
+from fastapi import Request
 
 router = APIRouter()
 
@@ -33,13 +35,14 @@ def create_user(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"{e}")
     
-@router.post("/otp/verify", response_model=UserInDb)
+@router.post("/otp/verify", response_model=TokenResponse)
 def verify_otp(
     otp: OtpVerify,
-    db: Session = Depends(get_db),
-) -> UserInDb:
+    request: Request,
+    db: Session = Depends(get_db)
+) -> TokenResponse:
     try:
-        return user_service.verify_otp(db, otp)
+        return user_service.verify_otp(db, otp, request)
 
     except UserNotFoundException as e:
         raise HTTPException(
@@ -53,9 +56,26 @@ def verify_otp(
             detail=str(e),
         )
 
-    except Exception:
+    except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail="Internal server error",
+            detail=f"Internal server error: {e}",
         )
-    
+
+@router.post("/refresh", response_model=TokenResponse)
+def refresh_token(
+    payload: RefreshTokenRequest,
+    request: Request,
+    db: Session = Depends(get_db),
+) -> TokenResponse:
+    try:
+        return user_service.refresh_access_token(
+            db=db,
+            raw_refresh_token=payload.refresh_token,
+            user_agent=request.headers.get("user-agent"),
+            ip_address=request.client.host,
+        )
+    except InvalidRefreshTokenException as e:
+        raise HTTPException(status_code=401, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal server error {e}")    
