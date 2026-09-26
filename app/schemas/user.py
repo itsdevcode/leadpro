@@ -10,6 +10,12 @@ class UserBase(BaseModel):
     is_deleted: bool = False
 
 
+class UserLogin(BaseModel):
+    email: EmailStr
+
+class LoginResponse(BaseModel):
+    message: str
+
 class UserCreate(UserBase):
     pass
 

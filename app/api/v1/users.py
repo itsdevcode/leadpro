@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.schemas.user import UserCreate, UserInDb
+from app.schemas.user import UserCreate, UserInDb, UserLogin,LoginResponse
 from app.schemas.otp import OtpVerify
 from app.schemas.token import TokenResponse, RefreshTokenRequest
 from app.core.database import get_db
@@ -11,6 +11,12 @@ from fastapi import Request
 
 router = APIRouter()
 
+@router.post("/login", response_model=LoginResponse)
+def login(user: UserLogin, db: Session = Depends(get_db)):
+    try:
+        return user_service.login(db, user)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"{e}")
 
 @router.post("/", response_model=UserInDb | None)
 def create_user(

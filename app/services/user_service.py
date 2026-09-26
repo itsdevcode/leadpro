@@ -2,7 +2,7 @@ import secrets
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 from app.schemas.otp import OtpCreate, OtpVerify
-from app.schemas.user import UserCreate, UserInDb
+from app.schemas.user import UserCreate, UserInDb, UserLogin, LoginResponse
 from app.schemas.token import TokenResponse
 from app.repository import user_repository
 from app.exceptions.user_exceptions import UserAlreadyExistsException, UserNotFoundException, UserNotActiveException
@@ -45,7 +45,7 @@ def create_user(db: Session, user: UserCreate) -> User:
         db.rollback()
         raise
 
-def verify_otp(db: Session, otp: OtpVerify, request: Request) ->User:
+def verify_otp(db: Session, otp: OtpVerify, request: Request) ->TokenResponse:
     try:
         user_obj = user_repository.get_user_by_email(db, otp.email)
         if not user_obj:
@@ -113,3 +113,27 @@ def refresh_access_token(db: Session, raw_refresh_token: str, user_agent: str | 
     }
     
    
+def login(db: Session, user: UserLogin) ->LoginResponse:
+    try:
+        user_obj = user_repository.get_user_by_email(db, user.email)
+        if not user_obj:
+            raise UserNotFoundException("User not found")
+        if user_obj.is_deleted:
+            raise UserNotFoundException("User not found")
+        if not user_obj.is_active:
+            raise UserNotActiveException("User is not active")
+        otp_code = secrets.randbelow(900000) + 100000
+        otp_obj = user_repository.create_otp(db, OtpCreate(
+            user_id=user_obj.id,
+            otp_code=str(otp_code),
+            expires_at=datetime.now() + timedelta(minutes=10),
+            is_used=False
+        ))
+        db.commit()
+        db.refresh(otp_obj)
+        return {
+            "message": "OTP sent successfully"
+        }
+    except Exception:
+        db.rollback()
+        raise
