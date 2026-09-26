@@ -16,3 +16,4 @@ class User(Base):
     updated_at: Mapped[datetime|None] = mapped_column(DateTime, default=None, nullable=True, onupdate=datetime.now)
 
     otp: Mapped["Otp | None"] = relationship(back_populates="user")
+    leads: Mapped[list["Lead"]] = relationship(back_populates="user")
