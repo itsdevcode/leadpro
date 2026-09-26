@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 from app.schemas.user import UserCreate, UserInDb
-from app.schemas.otp import OtpCreate, OtpInDb
+from app.schemas.otp import OtpCreate
 from app.models.user import User
 from app.models.otp import Otp
 from app.models.refresh_tokens import RefreshToken

@@ -45,7 +45,7 @@ def create_user(db: Session, user: UserCreate) -> User:
         db.rollback()
         raise
 
-def verify_otp(db: Session, otp: OtpVerify, request: Request) ->User:
+def verify_otp(db: Session, otp: OtpVerify, request: Request) ->TokenResponse:
     try:
         user_obj = user_repository.get_user_by_email(db, otp.email)
         if not user_obj:
