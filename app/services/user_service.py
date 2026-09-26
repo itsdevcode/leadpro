@@ -110,8 +110,7 @@ def refresh_access_token(db: Session, raw_refresh_token: str, user_agent: str | 
         "refresh_token": new_raw_refresh_token,
         "token_type": "bearer",
         "expires_in": settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-    }
-    
+    }   
    
 def login(db: Session, user: UserLogin) ->LoginResponse:
     try:
