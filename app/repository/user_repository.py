@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select
+from sqlalchemy.dialects.postgresql import insert
 from app.schemas.user import UserCreate, UserInDb
 from app.schemas.otp import OtpCreate
 from app.models.user import User
@@ -29,26 +30,38 @@ def create_user(db: Session, user: UserCreate) -> User:
     db.add(db_user)
     return db_user
 
-def create_otp(db: Session, otp:OtpCreate) -> Otp:
+def create_otp(db: Session, otp: OtpCreate) -> Otp:
     """
-    Create a new OTP.
+    Create or update an OTP for a user atomically.
     
     Args:
         db: Database session.
-        user_id: User ID.
-        code: OTP code.
+        otp: OTP data.
     
     Returns:
-        Created OTP.
+        Created or updated OTP.
     """
-    db_otp = Otp(
-        user_id=otp.user_id,
-        code=otp.otp_code,
-        expires_at=otp.expires_at,
-        is_used=otp.is_used
+    stmt = (
+        insert(Otp)
+        .values(
+            user_id=otp.user_id,
+            code=otp.otp_code,
+            expires_at=otp.expires_at,
+            is_used=otp.is_used,
+            created_at=datetime.now(),
+        )
+        .on_conflict_do_update(
+            index_elements=[Otp.user_id],
+            set_={
+                "code": otp.otp_code,
+                "expires_at": otp.expires_at,
+                "is_used": otp.is_used,
+                "updated_at": datetime.now(),
+            },
+        )
+        .returning(Otp)
     )
-    db.add(db_otp)
-    return db_otp
+    return db.execute(stmt).scalar_one()
 
 def get_user_by_email(db: Session, email: str) -> User | None:
     """
