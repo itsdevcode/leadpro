@@ -12,7 +12,7 @@ from sqlalchemy.exc import IntegrityError
 from app.models.user import User
 from app.core.config import settings
 from fastapi import Request
-from app.utils.jwt import create_access_token, create_refresh_token, hash_token
+from app.utils.jwt import create_access_token, create_refresh_token, decode_access_token, hash_token
 
 def create_user(db: Session, user: UserCreate) -> User:
     try:
