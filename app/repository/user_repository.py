@@ -96,3 +96,7 @@ def save_refresh_token(db: Session, user_id: int, token: str, expires_at: dateti
 def verify_refresh_token(db: Session, token_hash: str) -> RefreshToken | None:
     stmt = select(RefreshToken).where(RefreshToken.token_hash == token_hash)
     return db.execute(stmt).scalar_one_or_none()
+
+def get_user_by_id(db: Session, user_id: int) -> User | None:
+    stmt = select(User).where(User.id == user_id)
+    return db.execute(stmt).scalar_one_or_none()

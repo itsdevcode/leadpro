@@ -22,5 +22,6 @@ class Lead(Base):
     priority: Mapped[LeadPriority] = mapped_column(Enum(LeadPriority, name="lead_priority_enum"), nullable=True)
     lead_source: Mapped[str | None] = mapped_column(String(50), nullable=True)
     next_follow_up: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.now)
+    updated_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     user: Mapped["User"] = relationship(back_populates="leads")
