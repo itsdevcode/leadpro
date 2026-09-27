@@ -1,9 +1,10 @@
 import secrets
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
+from app.dto.login import LoginResult
+from app.dto.token import TokenResult
 from app.schemas.otp import OtpCreate, OtpVerify
-from app.schemas.user import UserCreate, UserInDb, UserLogin, LoginResponse
-from app.schemas.token import TokenResponse
+from app.schemas.user import UserCreate, UserLogin
 from app.repository import user_repository
 from app.exceptions.user_exceptions import UserAlreadyExistsException, UserNotFoundException, UserNotActiveException
 from app.exceptions.otp_exceptions import InvalidOtpException,InvalidRefreshTokenException
@@ -21,7 +22,7 @@ def create_user(db: Session, user: UserCreate) -> User:
         user_obj = user_repository.create_user(db, user)
         db.flush()
         otp = secrets.randbelow(900000) + 100000
-        otp_obj = user_repository.create_otp(db, OtpCreate(
+        _ = user_repository.create_otp(db, OtpCreate(
             user_id=user_obj.id,
             otp_code=str(otp),
             expires_at=datetime.now() + timedelta(minutes=10),
@@ -31,7 +32,7 @@ def create_user(db: Session, user: UserCreate) -> User:
         db.refresh(user_obj)
         return user_obj
 
-    except UserAlreadyExistsException as e:
+    except UserAlreadyExistsException:
         db.rollback()
         raise
 
@@ -45,7 +46,7 @@ def create_user(db: Session, user: UserCreate) -> User:
         db.rollback()
         raise
 
-def verify_otp(db: Session, otp: OtpVerify, request: Request) ->TokenResponse:
+def verify_otp(db: Session, otp: OtpVerify, request: Request) ->TokenResult:
     try:
         user_obj = user_repository.get_user_by_email(db, otp.email)
         if not user_obj:
@@ -69,22 +70,24 @@ def verify_otp(db: Session, otp: OtpVerify, request: Request) ->TokenResponse:
         refresh_token = create_refresh_token()
         expires_at = datetime.now() + timedelta(minutes=settings.REFRESH_TOKEN_EXPIRE_MINUTES)
         user_agent = request.headers.get("User-Agent")
-        ip_address = request.client.host
+        ip_address = request.client.host if request.client else None
         
         db_refresh_token = user_repository.save_refresh_token(db, user_obj.id, refresh_token, expires_at, user_agent, ip_address)        
         db.commit()
         db.refresh(db_refresh_token)
-        return {
-            "access_token": access_token,
-            "refresh_token": refresh_token,
-            "token_type": "bearer",
-            "expires_in": settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-        }
+        return TokenResult(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            token_type="bearer",
+            expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        )
+            
+        
     except Exception:
         db.rollback()
         raise
     
-def refresh_access_token(db: Session, raw_refresh_token: str, user_agent: str | None, ip_address: str | None) -> TokenResponse:
+def refresh_access_token(db: Session, raw_refresh_token: str, user_agent: str | None, ip_address: str | None) -> TokenResult:
     token_hash = hash_token(raw_refresh_token)
     db_token = user_repository.verify_refresh_token(db, token_hash)
 
@@ -105,14 +108,15 @@ def refresh_access_token(db: Session, raw_refresh_token: str, user_agent: str | 
     db_token.replaced_by_token_id = db_refresh_token.id
     db.commit()
     new_access_token = create_access_token(str(db_token.user_id))
-    return {
-        "access_token": new_access_token,
-        "refresh_token": new_raw_refresh_token,
-        "token_type": "bearer",
-        "expires_in": settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-    }   
+
+    return TokenResult(
+        access_token=new_access_token,
+        refresh_token=new_raw_refresh_token,
+        token_type="bearer",
+        expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+    )     
    
-def login(db: Session, user: UserLogin) ->LoginResponse:
+def login(db: Session, user: UserLogin) ->LoginResult:
     try:
         user_obj = user_repository.get_user_by_email(db, user.email)
         if not user_obj:
@@ -130,9 +134,10 @@ def login(db: Session, user: UserLogin) ->LoginResponse:
         ))
         db.commit()
         db.refresh(otp_obj)
-        return {
-            "message": "OTP sent successfully"
-        }
+        return LoginResult(
+            message="OTP sent successfully"
+        )
     except Exception:
         db.rollback()
         raise
+

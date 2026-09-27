@@ -1,9 +1,12 @@
-from datetime import datetime
+from __future__ import annotations
+from typing import TYPE_CHECKING
 from sqlalchemy import String, Text, Integer, ForeignKey, Enum, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.enum.lead import LeadStatus,LeadPriority
-
 from app.core.database import Base
+from datetime import datetime
+if TYPE_CHECKING:
+    from app.models.user import User
 
 class Lead(Base):
     __tablename__ = "leads"
