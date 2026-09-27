@@ -12,6 +12,11 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_ROTATE_WINDOW_MINUTES: int = 60 * 24 * 7
     SECRET_KEY: str = "SECRET_KEY"
     ALGORITHM: str = "HS256"
+    SMTP_HOST: str = "smtp.gmail.com"
+    SMTP_PORT: int = 465
+    SMTP_USERNAME: str = "heyarunyadav@gmail.com"
+    SMTP_PASSWORD: str = "heazsypalhlyjjzc"
+    SMTP_FROM_EMAIL: str = "heyarunyadav@gmail.com"
     
 
 settings = Settings()
