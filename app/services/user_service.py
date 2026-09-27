@@ -12,9 +12,11 @@ from sqlalchemy.exc import IntegrityError
 from app.models.user import User
 from app.core.config import settings
 from fastapi import Request
+from app.services.email_service import send_otp_email
 from app.utils.jwt import create_access_token, create_refresh_token, decode_access_token, hash_token
+from fastapi import BackgroundTasks
 
-def create_user(db: Session, user: UserCreate) -> User:
+def create_user(db: Session, user: UserCreate, background_tasks: BackgroundTasks) -> User:
     try:
         user_obj = user_repository.get_user_by_email(db, user.email)
         if user_obj:
@@ -29,6 +31,7 @@ def create_user(db: Session, user: UserCreate) -> User:
             is_used=False
         ))
         db.commit()
+        background_tasks.add_task(send_otp_email, user.email, str(otp))
         db.refresh(user_obj)
         return user_obj
 
@@ -116,7 +119,7 @@ def refresh_access_token(db: Session, raw_refresh_token: str, user_agent: str | 
         expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
     )     
    
-def login(db: Session, user: UserLogin) ->LoginResult:
+def login(db: Session, user: UserLogin, background_tasks: BackgroundTasks) ->LoginResult:
     try:
         user_obj = user_repository.get_user_by_email(db, user.email)
         if not user_obj:
@@ -133,6 +136,7 @@ def login(db: Session, user: UserLogin) ->LoginResult:
             is_used=False
         ))
         db.commit()
+        background_tasks.add_task(send_otp_email, user.email, str(otp_code))
         db.refresh(otp_obj)
         return LoginResult(
             message="OTP sent successfully"

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
 from app.dto.token import TokenResult
 from app.models.user import User
@@ -15,9 +15,9 @@ from typing import Annotated
 router = APIRouter()
 
 @router.post("/login", response_model=LoginResponse)
-def login(user: UserLogin, db: Annotated[Session, Depends(get_db)]) ->LoginResponse:
+def login(user: UserLogin, db: Annotated[Session, Depends(get_db)], background_tasks: BackgroundTasks) ->LoginResponse:
     try:
-        result = user_service.login(db, user)
+        result = user_service.login(db, user, background_tasks)
         return LoginResponse(
             message=result.message
         )
@@ -27,7 +27,8 @@ def login(user: UserLogin, db: Annotated[Session, Depends(get_db)]) ->LoginRespo
 @router.post("/", response_model=UserInDb)
 def create_user(
     user: UserCreate,
-    db: Annotated[Session, Depends(get_db)]
+    db: Annotated[Session, Depends(get_db)],
+    background_tasks: BackgroundTasks,
 ) -> User:
     """
     Creates a new user.
@@ -40,7 +41,7 @@ def create_user(
         The created user.
     """
     try:
-        user_obj = user_service.create_user(db, user)
+        user_obj = user_service.create_user(db, user, background_tasks)
         return user_obj
     except UserAlreadyExistsException as e:
         raise HTTPException(status_code=400, detail=f"{e}")
