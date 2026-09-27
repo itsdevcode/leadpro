@@ -14,9 +14,9 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     SMTP_HOST: str = "smtp.gmail.com"
     SMTP_PORT: int = 465
-    SMTP_USERNAME: str = "heyarunyadav@gmail.com"
-    SMTP_PASSWORD: str = ""
-    SMTP_FROM_EMAIL: str = "heyarunyadav@gmail.com"
+    SMTP_USERNAME: str = "test@mailiator.com"
+    SMTP_PASSWORD: str = "gygsfs378fdh67f"
+    SMTP_FROM_EMAIL: str = "test@mailiator.com"
     
 
 settings = Settings()
