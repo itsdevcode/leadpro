@@ -1,4 +1,6 @@
 
+from typing import ClassVar
+
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 
@@ -8,7 +10,7 @@ class TokenResponse(BaseModel):
     token_type: str = "bearer"
     expires_in: int = 60 * 60 * 24
     
-    model_config = ConfigDict(from_attributes=True)
+    model_config: ClassVar[ConfigDict] = ConfigDict(from_attributes=True)
 
 
 class TokenPairInDb(BaseModel):
@@ -23,7 +25,7 @@ class TokenPairInDb(BaseModel):
     created_at: datetime
     updated_at: datetime | None
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config: ClassVar[ConfigDict] = ConfigDict(from_attributes=True)
 
 class RefreshTokenRequest(BaseModel):
     refresh_token: str

@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
-from app.schemas.user import UserCreate, UserInDb
+from app.schemas.user import UserCreate
 from app.schemas.otp import OtpCreate
 from app.models.user import User
 from app.models.otp import Otp

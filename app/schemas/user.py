@@ -1,6 +1,7 @@
+from typing import ClassVar
+
 from pydantic import BaseModel, ConfigDict, EmailStr
 from datetime import datetime
-from typing import Optional
 
 class UserBase(BaseModel):
     name: str
@@ -21,16 +22,16 @@ class UserCreate(UserBase):
 
 
 class UserUpdate(BaseModel):
-    name: Optional[str] = None
-    email: Optional[EmailStr] = None
-    phone_number: Optional[str] = None
-    is_active: Optional[bool] = None
-    is_deleted: Optional[bool] = None
+    name: str | None = None
+    email: EmailStr | None = None
+    phone_number: str | None = None
+    is_active: bool | None = None
+    is_deleted: bool | None = None
 
 
 class UserInDb(UserBase):
     id: int
     created_at: datetime
-    updated_at: datetime | None
+    updated_at: datetime | None = None
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config: ClassVar[ConfigDict] = ConfigDict(from_attributes=True)

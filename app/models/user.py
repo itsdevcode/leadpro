@@ -1,7 +1,13 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
 from sqlalchemy import Integer, String, DateTime, Boolean
 from app.core.database import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
+
+if TYPE_CHECKING:
+    from app.models.otp import Otp
+    from app.models.lead import Lead
 
 class User(Base):
     __tablename__ = "users"
@@ -15,5 +21,5 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, nullable=False)
     updated_at: Mapped[datetime|None] = mapped_column(DateTime, default=None, nullable=True, onupdate=datetime.now)
 
-    otp: Mapped["Otp | None"] = relationship(back_populates="user")
-    leads: Mapped[list["Lead"]] = relationship(back_populates="user")
+    otp: Mapped[Otp | None] = relationship(back_populates="user")
+    leads: Mapped[list[Lead]] = relationship(back_populates="user")
