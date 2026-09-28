@@ -7,6 +7,7 @@ from app.core.database import Base
 from datetime import datetime
 if TYPE_CHECKING:
     from app.models.user import User
+    from app.models.lead_comments import LeadComment
 
 class Lead(Base):
     __tablename__ = "leads"
@@ -24,4 +25,7 @@ class Lead(Base):
     next_follow_up: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.now)
     updated_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+    #Relationships
     user: Mapped["User"] = relationship(back_populates="leads")
+    comments: Mapped[list["LeadComment"]] = relationship(back_populates="lead", cascade="all, delete-orphan")

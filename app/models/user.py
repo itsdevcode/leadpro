@@ -8,6 +8,7 @@ from datetime import datetime
 if TYPE_CHECKING:
     from app.models.otp import Otp
     from app.models.lead import Lead
+    from app.models.lead_comments import LeadComment
 
 class User(Base):
     __tablename__ = "users"
@@ -21,5 +22,7 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, nullable=False)
     updated_at: Mapped[datetime|None] = mapped_column(DateTime, default=None, nullable=True, onupdate=datetime.now)
 
+    #Relationships
     otp: Mapped[Otp | None] = relationship(back_populates="user")
     leads: Mapped[list[Lead]] = relationship(back_populates="user")
+    comments: Mapped[list["LeadComment"]] = relationship(back_populates="user")
