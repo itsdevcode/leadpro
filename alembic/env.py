@@ -10,6 +10,7 @@ from app.models.user import User
 from app.models.otp import Otp
 from app.models.refresh_tokens import RefreshToken
 from app.models.lead import Lead
+from app.models.lead_comments import LeadComment
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
