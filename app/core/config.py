@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 30
     REFRESH_TOKEN_ROTATE_WINDOW_MINUTES: int = 60 * 24 * 7
     SECRET_KEY: str = "SECRET_KEY"
+    REDIS_URL: str ="redis://localhost:6379/0"
     ALGORITHM: str = "HS256"
     SMTP_HOST: str = "smtp.gmail.com"
     SMTP_PORT: int = 465
